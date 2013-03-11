@@ -118,6 +118,7 @@ public class PerfectFailureDetector implements IFailureDetector {
 
 	@Override
 	public void isSuspected(Integer pid) {
+		if(!this.suspects.contains(pid))
 		this.suspects.add(pid);
 	}
 
@@ -131,14 +132,17 @@ public class PerfectFailureDetector implements IFailureDetector {
 		
 		int herPID=m.getSource();
 		
-		if(delay>Timeout)
-		{
-			isSuspected(herPID);
-			
-			System.out.println("Process "+herPID+" is suspected due to larger delay than expected");
-			
-			return;
-		}
+		//the communication delay is assumed to be Utils.DELAY,
+		//the task of adding suspicious processes is done in the periodic tasks
+		//no need to handle it again here.
+//		if(delay>Timeout)
+//		{
+//			isSuspected(herPID);
+//			
+//			System.out.println("Process "+herPID+" is suspected due to larger delay than expected");
+//			
+//			return;
+//		}
 		
 		this.numOfMsgsReceivedFromOthers_new[herPID]++;
 		
