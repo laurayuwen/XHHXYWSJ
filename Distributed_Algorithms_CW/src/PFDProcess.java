@@ -1,10 +1,12 @@
-class MyFirstProcess extends Process
+import java.util.ArrayList;
+
+class PFDProcess extends Process
 {
 	private IFailureDetector detector;
 	
-	public MyFirstProcess(String name, int pid, int workload) {
+	public PFDProcess(String name, int pid, int workload) {
 		super(name, pid, workload);
-		this.detector=new MyFirstFailureDetector(this);
+		this.detector=new PerfectFailureDetector(this);
 	}
 	
 	public void begin(){
@@ -13,7 +15,7 @@ class MyFirstProcess extends Process
 
 	public synchronized void receive(Message m){
 		String type=m.getType();
-		if(type!=null && type.equals(MyFirstFailureDetector.HeartbeatMessage)){
+		if(type!=null && type.equals(PerfectFailureDetector.HeartbeatMessage)){
 			this.detector.receive(m);
 		}
 	}
@@ -23,7 +25,7 @@ class MyFirstProcess extends Process
 		String pName=args[0];
 		int id=Integer.parseInt(args[1]);
 		int n=Integer.parseInt(args[2]);
-		MyFirstProcess p=new MyFirstProcess(pName,id,n);
+		PFDProcess p=new PFDProcess(pName,id,n);
 		p.registeR();
 		p.begin();
 	}
