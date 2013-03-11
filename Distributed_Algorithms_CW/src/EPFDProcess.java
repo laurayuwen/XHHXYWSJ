@@ -5,7 +5,7 @@ class EPFDProcess extends Process
 	
 	public EPFDProcess(String name, int pid, int workload) {
 		super(name, pid, workload);
-		this.detector=new PerfectFailureDetector(this);
+		this.detector=new EventuallyPerfectFailureDetector(this);
 	}
 	
 	public void begin(){
@@ -14,7 +14,7 @@ class EPFDProcess extends Process
 
 	public synchronized void receive(Message m){
 		String type=m.getType();
-		if(type!=null && type.equals(PerfectFailureDetector.HeartbeatMessage)){
+		if(type!=null && type.equals(EventuallyPerfectFailureDetector.HeartbeatMessage)){
 			this.detector.receive(m);
 		}
 	}
@@ -24,7 +24,7 @@ class EPFDProcess extends Process
 		String pName=args[0];
 		int id=Integer.parseInt(args[1]);
 		int n=Integer.parseInt(args[2]);
-		PFDProcess p=new PFDProcess(pName,id,n);
+		EPFDProcess p=new EPFDProcess(pName,id,n);
 		p.registeR();
 		p.begin();
 	}
