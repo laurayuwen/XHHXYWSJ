@@ -69,9 +69,11 @@ public class PerfectFailureDetector implements IFailureDetector {
 				}
 			}
 			
+			for (int index = 1; index < len; index++) {
 			//update the numbers of msgs table.
-			this.pfd.numOfMsgsReceivedFromOthers_old=
-					this.pfd.numOfMsgsReceivedFromOthers_new;
+			this.pfd.numOfMsgsReceivedFromOthers_old[index]=
+					this.pfd.numOfMsgsReceivedFromOthers_new[index];
+			}
 			
 		}
 		
