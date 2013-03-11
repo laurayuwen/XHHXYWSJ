@@ -156,8 +156,6 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 
 
 	private void removeFromSuspiciousList(int herPID) {
-		System.out.println("Process "+this.p.pid+
-				":I don't suspect process"+herPID+" now");
 		
 		if(!this.suspects.contains(herPID)){
 			return;
@@ -169,6 +167,9 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 				break;
 			}
 		}
+		
+		System.out.println("Process "+this.p.pid+
+				":I don't suspect process"+herPID+" now");
 		
 	}
 
