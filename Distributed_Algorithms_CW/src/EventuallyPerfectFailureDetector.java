@@ -9,7 +9,7 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 	
 	static final String NULL_MSG="null";
 	
-	static final int Delta=1000; /* 1second*/
+	static final int Delta=1000; /* 2second*/
 	
 	static final int Timeout = Delta+Utils.DELAY;
 	
@@ -84,12 +84,15 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 		int numOfP=this.p.n;
 		this.link_timeoutArray=new long[numOfP+1];
 		
-		//at the beginning, no msg arrived, so the default value is 0
+		//at the beginning, no msg arrived, let the default value be the cur time. 
 		this.timestampForReceivingLastMsg=new long[numOfP+1];
+		
+		long curTime=System.currentTimeMillis();
 		
 		for (int i = 1; i <= numOfP; i++) {
 			//the inital timeout value is the same for every process
 			this.link_timeoutArray[i]=Utils.DELAY;
+			this.timestampForReceivingLastMsg[i]=curTime;
 		}
 		
 	}
@@ -100,9 +103,7 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 	public void begin() {
 		this.bcastTask.schedule(new PeriodicBroadcastTask(), 0, Delta);
 
-		//start the repeated checking task after "Timeout" seconds
-		//so that there is adequate time to receive msgs.
-		this.checkTask.schedule(new PeriodicCheckTask(this), Timeout, Timeout);
+		this.checkTask.schedule(new PeriodicCheckTask(this), 0, Timeout);
 	}
 
 	@Override
@@ -155,6 +156,9 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 
 
 	private void removeFromSuspiciousList(int herPID) {
+		System.out.println("Process "+this.p.pid+
+				":I don't suspect process"+herPID+" now");
+		
 		if(!this.suspects.contains(herPID)){
 			return;
 		}
