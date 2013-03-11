@@ -16,7 +16,7 @@ public class PerfectFailureDetector implements IFailureDetector {
 	
 	static final String NULL_MSG="null";
 	
-	static final int Delta=1000; /* 1second*/
+	static final int Delta=2000; /* 2second*/
 	
 	static final int Timeout = Delta+Utils.DELAY;
 	

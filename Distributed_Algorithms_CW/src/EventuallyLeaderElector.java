@@ -3,7 +3,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class EventuallyPerfectFailureDetector implements IFailureDetector{
+public class EventuallyLeaderElector implements IFailureDetector{
 	
 	static final String HeartbeatMessage="heartbeat";
 	
@@ -34,12 +34,12 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 	
 	private class PeriodicCheckTask extends TimerTask{
 
-		private EventuallyPerfectFailureDetector epfd;
+		private EventuallyLeaderElector epfd;
 		private long[] theLinkTimeOutArray;
 		
 		private long[] theRecordedTimeOfLastMsg;
 		
-		public PeriodicCheckTask(EventuallyPerfectFailureDetector epfd){
+		public PeriodicCheckTask(EventuallyLeaderElector epfd){
 			this.epfd=epfd;
 			this.theLinkTimeOutArray=this.epfd.link_timeoutArray;
 			this.theRecordedTimeOfLastMsg=this.epfd.timestampForReceivingLastMsg;
@@ -68,7 +68,7 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 	
 	
 
-	public EventuallyPerfectFailureDetector(Process p) {
+	public EventuallyLeaderElector(Process p) {
 		super();
 		this.p = p;
 		this.bcastTask=new Timer();
@@ -110,7 +110,12 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 
 	@Override
 	public int getLeader() {
-		// TODO Auto-generated method stub
+		int numberOfProcesses=this.p.n;
+		for (int index = numberOfProcesses; index >=1; index--) {
+			if(!this.isSuspect(index))
+				return index;
+		}
+		
 		return -1;
 	}
 
@@ -121,10 +126,13 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 
 	@Override
 	public void isSuspected(Integer pid) {
-		if(!this.suspects.contains(pid))
+		if(!this.suspects.contains(pid)){
 		this.suspects.add(pid);
 		
 		System.out.println(this.p.pid+": I suspect "+pid);
+		
+		System.out.println(this.p.pid+": I think the new leader is "+this.getLeader());
+		}
 	}
 
 	@Override
@@ -148,7 +156,7 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 			this.link_timeoutArray[herPID]=link_delay;
 			
 			System.out.println("Process"+this.p.pid+
-				"Increase the max link delay for Process"+herPID+" to "+link_delay);
+				": Increase the max link delay for Process"+herPID+" to "+link_delay);
 		}
 		
 		Utils.out(p.pid,m.toString());		
@@ -172,6 +180,8 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 		
 		System.out.println("Process "+this.p.pid+
 				":I don't suspect process"+herPID+" now");
+		
+		System.out.println(this.p.pid+": I think the new leader is "+this.getLeader());
 		
 	}
 
