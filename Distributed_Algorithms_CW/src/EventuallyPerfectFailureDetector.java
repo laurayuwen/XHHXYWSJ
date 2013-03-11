@@ -50,6 +50,9 @@ public class EventuallyPerfectFailureDetector implements IFailureDetector{
 			long curTimestamp=System.currentTimeMillis();
 			
 			for (int i = 1; i < theLinkTimeOutArray.length; i++) {
+				if(i==this.epfd.p.pid)
+					continue;
+				
 				long dur=curTimestamp-this.theRecordedTimeOfLastMsg[i];
 				if(dur>Delta+theLinkTimeOutArray[i]){
 				
