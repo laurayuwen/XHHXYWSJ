@@ -73,11 +73,15 @@ private void init() {
 				if(this.sfd.numOfMsgsReceivedFromOthers_old[index]
 					==this.sfd.numOfMsgsReceivedFromOthers_new[index]){
 					
-					this.sfd.isSuspect(index);
-					System.out.println("Process "+index+
-							" is suspected due to timeout");
+					this.sfd.isSuspected(index);
 
 				}
+				
+//				System.out.println
+//				("old "+index+":"+this.sfd.numOfMsgsReceivedFromOthers_old[index]);
+//				
+//				System.out.println("new "+index+":"+
+//						this.sfd.numOfMsgsReceivedFromOthers_new[index]);
 			}
 			
 			for (int index = 1; index < len; index++) {
@@ -98,7 +102,6 @@ private void init() {
 
 	@Override
 	public int getLeader() {
-		// TODO Auto-generated method stub
 		return -1;
 	}
 
@@ -109,22 +112,25 @@ private void init() {
 
 	@Override
 	public void isSuspected(Integer pid) {
-		if(!this.suspects.contains(pid))
+		
+		if(!this.suspects.contains(pid)){
 			this.suspects.add(pid);
+			
+		}
 	}
 
 	@Override
 	public void receive(Message m) {
-		long delay=	System.currentTimeMillis()-
-				Long.parseLong(m.getPayload());
+//		long delay=	System.currentTimeMillis()-
+//				Long.parseLong(m.getPayload());
 	
-	System.out.println("The delay is "+delay+" miliseconds");
+//	System.out.println("The delay is "+delay+" miliseconds");
 	
 	int herPID=m.getSource();
 	
 	this.numOfMsgsReceivedFromOthers_new[herPID]++;
 	
-	Utils.out(p.pid,m.toString());		
+//	Utils.out(p.pid,m.toString());		
 
 	}
 

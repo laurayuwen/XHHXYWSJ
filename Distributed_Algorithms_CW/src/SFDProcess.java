@@ -68,6 +68,7 @@ public class SFDProcess extends Process {
 			
 			else{
 				while(!p.detector.isSuspect(r)){
+					
 					if(p.hasReceivedValFrom[r]){
 						p.x=p.valReceived[r];
 						break;
@@ -76,6 +77,10 @@ public class SFDProcess extends Process {
 					else
 						Thread.yield();
 				}
+				
+				System.out.println("Process "+
+				p.pid+(p.detector.isSuspect(r)?" suspects ":" trusts ")+"process "+r);
+				
 			}
 		}
 		

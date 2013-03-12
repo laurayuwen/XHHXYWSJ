@@ -62,9 +62,7 @@ public class PerfectFailureDetector implements IFailureDetector {
 				if(this.pfd.numOfMsgsReceivedFromOthers_old[index]
 					==this.pfd.numOfMsgsReceivedFromOthers_new[index]){
 					
-					this.pfd.isSuspect(index);
-					System.out.println("Process "+index+
-							" is suspected due to timeout");
+					this.pfd.isSuspected(index);
 
 				}
 			}
@@ -118,8 +116,12 @@ public class PerfectFailureDetector implements IFailureDetector {
 
 	@Override
 	public void isSuspected(Integer pid) {
-		if(!this.suspects.contains(pid))
+		if(!this.suspects.contains(pid)){
 		this.suspects.add(pid);
+		
+		System.out.println("Process "+pid+
+				" is suspected due to timeout");
+		}
 	}
 
 	@Override
