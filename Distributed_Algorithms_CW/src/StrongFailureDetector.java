@@ -2,34 +2,45 @@ import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
-public class PerfectFailureDetector implements IFailureDetector {
+public class StrongFailureDetector implements IFailureDetector {
 	Process p;
 	LinkedList<Integer> suspects;
 	Timer t;
+
+	public StrongFailureDetector(SFDProcess sfdProcess) {
+		super();
+		this.p = sfdProcess;
+		this.t=new Timer();
+		this.suspects=new LinkedList<Integer>();
+		
+		init();
+	}
 	
+private void init() {
+	this.numOfMsgsReceivedFromOthers_old=new int[this.p.n+1];
+	this.numOfMsgsReceivedFromOthers_new=new int[this.p.n+1];
+	}
+
 	private int[] numOfMsgsReceivedFromOthers_old;
 	
 	private int[] numOfMsgsReceivedFromOthers_new;
 	
 	static final String HeartbeatMessage="heartbeat";
 	
-	static final String NULL_MSG="null";
-	
 	static final int Delta=2000; /* 2second*/
 	
 	static final int Timeout = Delta+Utils.DELAY;
 	
 	
-	class PeriodicTask extends TimerTask {
+	private class PeriodicTask extends TimerTask {
 		private int numOfBroadcastsInTheChecking=-1;
 		
-		private PerfectFailureDetector pfd;
+		private StrongFailureDetector sfd;
 		private int len;
 		
-		public PeriodicTask(PerfectFailureDetector pfd){
-			this.pfd=pfd;
-			this.len=this.pfd.numOfMsgsReceivedFromOthers_old.length;
+		public PeriodicTask(StrongFailureDetector sfd){
+			this.sfd=sfd;
+			this.len=this.sfd.numOfMsgsReceivedFromOthers_old.length;
 		}
 
 		@Override
@@ -49,7 +60,7 @@ public class PerfectFailureDetector implements IFailureDetector {
 		private void check() {
 			
 			for (int index = 1; index < len; index++) {
-				if(index==this.pfd.p.pid)
+				if(index==this.sfd.p.pid)
 					continue;
 				
 				//if we haven't heard from a process within two
@@ -59,10 +70,10 @@ public class PerfectFailureDetector implements IFailureDetector {
 				//delta+delay should be definitely less than twice delta.
 				//therefore, if a process is not crashed, we should be able to 
 				//get the message within two delta time.
-				if(this.pfd.numOfMsgsReceivedFromOthers_old[index]
-					==this.pfd.numOfMsgsReceivedFromOthers_new[index]){
+				if(this.sfd.numOfMsgsReceivedFromOthers_old[index]
+					==this.sfd.numOfMsgsReceivedFromOthers_new[index]){
 					
-					this.pfd.isSuspect(index);
+					this.sfd.isSuspect(index);
 					System.out.println("Process "+index+
 							" is suspected due to timeout");
 
@@ -71,33 +82,13 @@ public class PerfectFailureDetector implements IFailureDetector {
 			
 			for (int index = 1; index < len; index++) {
 			//update the numbers of msgs table.
-			this.pfd.numOfMsgsReceivedFromOthers_old[index]=
-					this.pfd.numOfMsgsReceivedFromOthers_new[index];
+			this.sfd.numOfMsgsReceivedFromOthers_old[index]=
+					this.sfd.numOfMsgsReceivedFromOthers_new[index];
 			}
 			
 		}
 		
 	}
-	
-	
-
-	public PerfectFailureDetector(Process p) {
-		super();
-		this.p = p;
-		this.t=new Timer();
-		this.suspects=new LinkedList<Integer>();
-		
-		init();
-	}
-	
-	
-
-	private void init() {
-		this.numOfMsgsReceivedFromOthers_old=new int[this.p.n+1];
-		this.numOfMsgsReceivedFromOthers_new=new int[this.p.n+1];
-	}
-
-
 
 	@Override
 	public void begin() {
@@ -119,22 +110,21 @@ public class PerfectFailureDetector implements IFailureDetector {
 	@Override
 	public void isSuspected(Integer pid) {
 		if(!this.suspects.contains(pid))
-		this.suspects.add(pid);
+			this.suspects.add(pid);
 	}
 
 	@Override
 	public void receive(Message m) {
-		
 		long delay=	System.currentTimeMillis()-
-					Long.parseLong(m.getPayload());
-		
-		System.out.println("The delay is "+delay+" miliseconds");
-		
-		int herPID=m.getSource();
-		
-		this.numOfMsgsReceivedFromOthers_new[herPID]++;
-		
-		Utils.out(p.pid,m.toString());		
+				Long.parseLong(m.getPayload());
+	
+	System.out.println("The delay is "+delay+" miliseconds");
+	
+	int herPID=m.getSource();
+	
+	this.numOfMsgsReceivedFromOthers_new[herPID]++;
+	
+	Utils.out(p.pid,m.toString());		
 
 	}
 
