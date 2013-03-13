@@ -136,7 +136,7 @@ public class PerfectFailureDetector implements IFailureDetector {
 		
 		this.numOfMsgsReceivedFromOthers_new[herPID]++;
 		
-		Utils.out(p.pid,m.toString());		
+//		Utils.out(p.pid,m.toString());		
 
 	}
 
