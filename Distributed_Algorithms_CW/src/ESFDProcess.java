@@ -229,6 +229,9 @@ public class ESFDProcess extends Process {
 				continue;
 			}
 			
+			if(p.detector.isSuspect(c))
+				continue;
+			
 			/////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//the max timeout value is calculated by adding 
 			//two max_link_delay and the max computation time of the coordinator
