@@ -11,7 +11,12 @@ public class ESFDProcess extends Process {
 	
 	private int r=0;
 	
-	private int numOfMsgReceived=0;
+	private int numOfMsgReceived;
+	
+	//if a process received 2/3 *N msg with future rounds
+	//it indicates that the most of processes are much faster
+	//it's possible that it has to terminate itself if needed.
+	private int numOfFutureMsgs;
 	
 	private String[] majorValCalByProcesses;
 	
@@ -48,12 +53,15 @@ public class ESFDProcess extends Process {
 			String herVal=content.substring(0,indexOfDelimiter);
 			int herRound=Integer.parseInt(content.substring(indexOfDelimiter+1));
 			
-			//if the msg received from the process is not for the current round,
+			//if the msg received from the process is for the earlier round,
 			//then safely ignore it.
-			if(herRound!=this.r)
+			if(herRound<this.r)
 				return;
 			
 			else{
+				if(herRound>this.r)
+					this.numOfFutureMsgs++;
+				
 				this.numOfMsgReceived++;
 				
 				this.sendersList.add(senderID);
@@ -116,6 +124,13 @@ public class ESFDProcess extends Process {
 		return this.valAndOccurNumPair.keySet().size()==1;
 	}
 	
+	private boolean isVerySlow(){
+		int maxFail= (int)Math.floor((n-1)/3.0);
+		
+		int min_numOfCorrect=this.n-maxFail;
+		
+		return this.numOfFutureMsgs>=min_numOfCorrect;
+	}
 	
 	public static void main(String[] args) 
 	{		
@@ -209,6 +224,15 @@ public class ESFDProcess extends Process {
 				if(consensus){
 					System.out.println("Process "+p.pid+" has decided on "+p.x);
 					
+					if(p.isVerySlow())
+					{
+						//if the isVerySlow method returns true,
+						//it indicates that many other processes are much faster,
+						//then it should not expect to be reminded by others to exit
+//						System.exit(0);
+						break;
+					}
+					
 					if(m==p.pid){
 						p.printAllTheMajorValDecidedByCoordinators();
 						
@@ -218,7 +242,8 @@ public class ESFDProcess extends Process {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						System.exit(0);
+//						System.exit(0);
+						break;
 					}
 					
 					else if(m==0){
@@ -226,6 +251,7 @@ public class ESFDProcess extends Process {
 					}
 				}
 				
+				p.resetVar();
 				continue;
 			}
 			
@@ -253,7 +279,8 @@ public class ESFDProcess extends Process {
 					
 					if(m==c){
 						p.printAllTheMajorValDecidedByCoordinators();
-						System.exit(0);
+//						System.exit(0);
+						break;
 					}
 					
 					else if(m==0){
@@ -267,10 +294,15 @@ public class ESFDProcess extends Process {
 		
 	}
 
-	
+
+	private void resetVar() {
+		this.numOfMsgReceived=0;
+		this.valAndOccurNumPair.clear();
+		this.sendersList.clear();
+	}
 
 	private void printAllTheMajorValDecidedByCoordinators() {
-		for (int i = 0; i < this.decisionsMadeByProcesses.length; i++) {
+		for (int i = 1; i < this.decisionsMadeByProcesses.length; i++) {
 			if(i==this.pid)
 				continue;
 			
@@ -295,9 +327,6 @@ public class ESFDProcess extends Process {
 	}
 
 	private static void reset(ESFDProcess p, int cid) {
-		p.numOfMsgReceived=0;
-		p.sendersList.clear();
-		p.valAndOccurNumPair.clear();
 		p.decisionsMadeByProcesses[cid]=false;
 		p.majorValCalByProcesses[cid]=null;
 	}
