@@ -181,7 +181,7 @@ public class ESFDProcess extends Process {
 
 		int m = 0;
 
-		while (true) {
+		out:while (true) {
 
 			p.r++;
 
@@ -235,16 +235,11 @@ public class ESFDProcess extends Process {
 
 					if (m == p.pid) {
 
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
 						// System.exit(0);
 						System.out.println("coordinator " + p.getName()
 								+ " exits.");
-						System.exit(0);
+						
+						break out;
 					}
 
 					else if (m == 0) {
@@ -286,7 +281,7 @@ public class ESFDProcess extends Process {
 								+ " exits normally after being"
 								+ " informed by P" + c);
 						
-						System.exit(0);
+						break out;
 					}
 
 					else if (m == 0) {
