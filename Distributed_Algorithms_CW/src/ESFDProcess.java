@@ -1,22 +1,22 @@
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class ESFDProcess extends Process {
 
-	public class Pair<T1, T2> {
-		T1 majorVal;
-		T2 consensus;
+	public class Pair {
+		String majorVal;
+		boolean consensus;
 		
 		public Pair(String theAgreedVal, boolean decision) {
-			// TODO Auto-generated constructor stub
+			this.majorVal=theAgreedVal;
+			this.consensus=decision;
 		}
 
-		T1 getMajorVal(){
+		String getMajorVal(){
 			return majorVal;
 		}
 		
-		T2 getConsensus(){
+		boolean getConsensus(){
 			return consensus;
 		}
 
@@ -30,7 +30,7 @@ public class ESFDProcess extends Process {
 
 	private int numOfMsgReceived;
 	
-	private HashMap<Integer,Pair<String,Boolean>> roundPairMap;
+	private HashMap<Integer,Pair> roundPairMap;
 
 	
 
@@ -46,7 +46,7 @@ public class ESFDProcess extends Process {
 
 		this.detector = new EventuallyStrongFailureDetector(this);
 		
-		this.roundPairMap=new HashMap<Integer,Pair<String,Boolean>>();
+		this.roundPairMap=new HashMap<Integer,Pair>();
 	}
 
 	public void begin() {
@@ -109,7 +109,7 @@ public class ESFDProcess extends Process {
 				return;
 
 			else {
-				this.roundPairMap.put(this.r, new Pair<String,Boolean>(theAgreedVal,decision));
+				this.roundPairMap.put(this.r, new Pair(theAgreedVal,decision));
 			}
 		}
 	}
@@ -270,7 +270,7 @@ public class ESFDProcess extends Process {
 
 			
 			while(!p.detector.isSuspect(c)){
-				Pair<String,Boolean> outcomePair=p.roundPairMap.get(p.r);
+				Pair outcomePair=p.roundPairMap.get(p.r);
 			//if this is not null, it indicates we have received outcome message from the coordinator	
 			if ( outcomePair!= null) {
 				p.x = outcomePair.getMajorVal();
@@ -296,6 +296,12 @@ public class ESFDProcess extends Process {
 								+ " who first told me the consensus decision");
 					}
 				}
+				
+				break;
+			}
+			
+			else{
+				Thread.yield();
 			}
 		}
 
